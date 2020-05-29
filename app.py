@@ -2,12 +2,8 @@ import dash
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
-import pandas as pd
 import pandas_datareader.data as web
 from datetime import datetime
-import random
-import plotly.graph_objs as go
-from collections import deque
 
 app = dash.Dash(__name__)
 
