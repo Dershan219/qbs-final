@@ -10,27 +10,21 @@ import sqlite3
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from secret import *
 
-# check out top 15 popular tweets
-def popular_tweets(keyword, days=7): # yesterday → days = 1
-    api = API(auth)
-    until = datetime.now().date()-timedelta(days=days)
-    results = api.search(keyword, result_type='popular', until=until)
-    results_df = json_normalize([r._json for r in results])
-    tweets_df = results_df.iloc[:,[0,2,3]]
-    return tweets_df
-
 #%%
+# Creating Tweets Database-------------------------------------------------
 conn = sqlite3.connect('twitter.db')
 c = conn.cursor()
 
 analyzer = SentimentIntensityAnalyzer()
 
+# create table for tweets
 def create_table():
     c.execute("CREATE TABLE IF NOT EXISTS tweets (id TEXT PRIMARY KEY, time INTEGER, tweet TEXT, sentiment REAL)")
     conn.commit()
 
 create_table()
 
+# update tweets with stream listener
 class Listener(StreamListener):
     def on_data(self, data):
         try:
@@ -38,9 +32,9 @@ class Listener(StreamListener):
             tweet_id = str(data['id_str'])
             tweet = unidecode(data['text'])
             time_ts = data['timestamp_ms']
-            sentiment = analyzer.polarity_scores(tweet)['compound']
-            print(time_ts, tweet_id, tweet, sentiment)
+            sentiment = analyzer.polarity_scores(tweet)['compound'] # calculate sentiment scores
             # sentiment = model.predict(tweet)
+            print(time_ts, tweet_id, tweet, sentiment)
             c.execute("INSERT OR IGNORE INTO tweets (id, time, tweet, sentiment) VALUES (?, ?, ?, ?)", 
                 (tweet_id, time_ts, tweet, sentiment))
             conn.commit()
@@ -52,7 +46,7 @@ class Listener(StreamListener):
     def on_error(self, status):
         print(status)
 
-#%%
+# stream all tweets into database
 while True:
     try:
         auth = OAuthHandler(consumer_key, consumer_secret)
@@ -62,4 +56,19 @@ while True:
     except Exception as e:
         print(str(e))
         time.sleep(5)
+#%%
+# Utility Functions--------------------------------------------------------
+# query tweets with keyword for database
+def query_table(keyword):
+    df = pd.read_sql('SELECT * FROM tweets WHERE tweet LIKE ? ORDER BY time DESC LIMIT 200', conn, params=('%' + keyword + '%', ))
+    df['date'] = pd.to_datetime(df['time'], unit='ms')
+    return df
 
+# check out top 15 popular tweets
+def popular_tweets(keyword, days=7): # yesterday → days = 1
+    api = API(auth)
+    until = datetime.now().date()-timedelta(days=days)
+    results = api.search(keyword, result_type='popular', until=until)
+    results_df = json_normalize([r._json for r in results])
+    tweets_df = results_df.iloc[:,[0,2,3]]
+    return tweets_df
