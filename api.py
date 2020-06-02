@@ -26,7 +26,7 @@ c = conn.cursor()
 analyzer = SentimentIntensityAnalyzer()
 
 def create_table():
-    c.execute("CREATE TABLE IF NOT EXISTS tweets (time INTEGER, id TEXT, tweet TEXT, sentiment REAL)")
+    c.execute("CREATE TABLE IF NOT EXISTS tweets (id TEXT PRIMARY KEY, time INTEGER, tweet TEXT, sentiment REAL)")
     conn.commit()
 
 create_table()
@@ -41,8 +41,8 @@ class Listener(StreamListener):
             sentiment = analyzer.polarity_scores(tweet)['compound']
             print(time_ts, tweet_id, tweet, sentiment)
             # sentiment = model.predict(tweet)
-            c.execute("INSERT INTO tweets (time, id, tweet, sentiment) VALUES (?, ?, ?, ?)", 
-                (time_ts, tweet_id, tweet, sentiment))
+            c.execute("INSERT OR IGNORE INTO tweets (id, time, tweet, sentiment) VALUES (?, ?, ?, ?)", 
+                (tweet_id, time_ts, tweet, sentiment))
             conn.commit()
         except KeyError as e:
             print(str(e))
