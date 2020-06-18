@@ -8,6 +8,8 @@ import sqlite3
 import time
 import os
 
+os.chdir('C://Users/Andy/Desktop/NTU Courses/Quantitative Business Science/Project/twitter-sentiment')
+
 app = dash.Dash(__name__)
 
 external_css = ["https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css"]

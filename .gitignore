@@ -1,3 +1,5 @@
 *.db
 *.docx
 __pycache__/
+*.h5
+*.pickle
