@@ -12,7 +12,15 @@ import time
 import os
 import re
 
-os.chdir('C://Users/Andy/Desktop/NTU Courses/Quantitative Business Science/Project/twitter-sentiment')
+from io import BytesIO
+from wordcloud import WordCloud
+import base64
+from sklearn.feature_extraction.text import TfidfVectorizer
+from nltk import word_tokenize
+from nltk.stem.porter import PorterStemmer
+
+
+os.chdir('/Users/julieta/Desktop/twitter-sentiment')
 
 # global settings-----------------------------------------------------------
 
@@ -103,13 +111,31 @@ body = dbc.Container(
         html.Br(),
         dbc.Row(
             [
-                dbc.Col(html.Div(id='live-table'), width=6),
+                dbc.Col(html.Div(id='live-table'), width=5),
                 dcc.Interval(id='table-update', interval=REFRESH),
-                dbc.Col(dcc.Graph(id='live-pie', animate=False), width=6),
+                dbc.Col(dcc.Graph(id='live-pie', animate=False), width=5),
                 dcc.Interval(id='pie-update', interval=10*REFRESH),
             ],
             justify='between'
-        )
+        ),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.H5(
+                        "WordCloud",
+                        style={'text-align':'center', 'color':'{}'.format(app_colors['text'])}
+                        ),
+                    width=6),            
+            ],
+            justify='between'
+        ),
+        html.Br(),
+        html.Div(
+            [
+            html.Img(id="image_wc"),
+            ]
+        ),
     ]
 )
 
@@ -134,14 +160,43 @@ footer = dbc.Container(
 
 # def generate_terms(df):
 
+def tokenize(text):
+    tokens = word_tokenize(text)
+    stems = []
+    for item in tokens: stems.append(PorterStemmer().stem(item))
+    return stems
 
-# @app.callback(
-#     Output('live-term', 'children'),
-#     [Input('keyword', 'value'),
-#      Input('term-update', 'n_intervals')]
-# )
+@app.callback(
+    Output('live-term', 'children'),
+    [Input('keyword', 'value'),
+     Input('term-update', 'n_intervals')]
+)
 
-# def update_terms(keyword, n):
+def update_terms(keyword, n):
+    conn = sqlite3.connect('twitter.db')
+    df = pd.read_sql(
+    "SELECT tweet, keywords FROM tweets WHERE tweet LIKE ? ORDER BY time DESC LIMIT 2000",
+    conn, params=('%' + keyword + '%', ))
+
+    text = []
+    for kw in df.keywords:
+        seq = kw.split(',')
+        seq = ' '.join(seq)
+        text.append(seq)
+
+    # word tokenize and stem
+    text = [" ".join(tokenize(txt.lower())) for txt in text]
+    vectorizer = TfidfVectorizer()
+    matrix = vectorizer.fit_transform(text).todense()
+    # transform the matrix to a pandas df
+    matrix = pd.DataFrame(matrix, columns=vectorizer.get_feature_names())
+    # sum over each document (axis=0)
+    top_words = matrix.sum(axis=0).sort_values(ascending=False)
+
+    imp_kw=pd.DataFrame(top_words.items(), columns=['word', 'freq'])
+    imp_kw=imp_kw[~ imp_kw['word'].str.contains(keyword.lower())].reset_index()
+    del imp_kw['index']
+    return imp_kw.word[0]
 
 
 @app.callback(
@@ -221,6 +276,7 @@ def update_graph(keyword, n):
 #%%
 #most negative tweets-------------------------------------------------------
 def generate_table(df):
+    # print(df.head())
     return dash_table.DataTable(
         id='live-table',
         columns=[{"name": i, "id": i, "selectable":True} for i in df.columns],
@@ -268,7 +324,6 @@ def update_negative_tweets(keyword, n):
     df['tweet'] = df['tweet'].apply(lambda x: re.sub(r"RT|@\S+|\Whttps:\S+|\Whttp:\S+|\.\.\.",' ', x))
     df['sentiment'] = df['sentiment'].apply(lambda x: re.sub("(?<=....)(.*?)(?=e.+)", '', str(x))).astype(float)
     return generate_table(df)
-
 #%%
 # P/N Ratio
 @app.callback(
@@ -310,7 +365,69 @@ def update_pie(keyword, n):
         layout=layout
     )
 
+<<<<<<< HEAD
 app.layout = html.Div([header, body, footer])
+=======
+
+#%%
+# wordcloud
+# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+app.layout = html.Div([
+    html.Img(id="image_wc"),
+])
+
+def plot_wordcloud(data):
+    d = {a: x for a, x in data.values}
+    wc = WordCloud(background_color='black', width=480, height=360)
+    wc.fit_words(d)
+    return wc.to_image()
+
+# def tokenize(text):
+#     tokens = word_tokenize(text)
+#     stems = []
+#     for item in tokens: stems.append(PorterStemmer().stem(item))
+#     return stems
+
+@app.callback(
+    dash.dependencies.Output('image_wc', 'src'), 
+    [dash.dependencies.Input('keyword', 'value')]
+)
+
+def make_image(keyword):
+    conn = sqlite3.connect('twitter.db')
+    df = pd.read_sql(
+        "SELECT tweet, keywords FROM tweets WHERE tweet LIKE ? ORDER BY time DESC LIMIT 2000",
+        conn, params=('%' + keyword + '%', ))
+    
+    # print(df.head())
+
+    text = []
+    for kw in df.keywords:
+        seq = kw.split(',')
+        seq = ' '.join(seq)
+        text.append(seq)
+
+    # word tokenize and stem
+    text = [" ".join(tokenize(txt.lower())) for txt in text]
+    vectorizer = TfidfVectorizer()
+    matrix = vectorizer.fit_transform(text).todense()
+    # transform the matrix to a pandas df
+    matrix = pd.DataFrame(matrix, columns=vectorizer.get_feature_names())
+    # sum over each document (axis=0)
+    top_words = matrix.sum(axis=0).sort_values(ascending=False)
+
+    dfm=pd.DataFrame(top_words.items(), columns=['word', 'freq'])
+    dfm=dfm[~ dfm['word'].str.contains(keyword.lower())]
+
+    img = BytesIO()
+    plot_wordcloud(data=dfm).save(img, format='PNG')
+    
+    return 'data:image/png;base64,{}'.format(base64.b64encode(img.getvalue()).decode())
+
+
+app.layout = html.Div([header, body])
+>>>>>>> 28c2a2aba628f6033185323ec39a030befc81554
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
