@@ -59,7 +59,8 @@ header = dbc.Navbar(
             dbc.Input(
                 id='keyword', value='Trump',
                 type='text', placeholder="Search Term",
-                style={'height':'36px', 'margin-top':'0px'}),
+                style={'height':'36px', 'margin-top':'0px'},
+                debounce=True),
             md=9
         ),
         dbc.Col(
@@ -99,7 +100,8 @@ tab1 = dbc.Card(
                                 'line-height':'1.2', 'padding':'0rem 0.3rem',
                                 'vertical-align':'top', 'border-color':'rgba(0,0,0,0)',
                                 'color':'{}'.format(app_colors['plot1']), 'text-shadow':'none'
-                            }      
+                            },
+                            n_clicks=0      
                         ),
                         width=0.5
                     ),
@@ -111,7 +113,8 @@ tab1 = dbc.Card(
                                 'line-height':'1.2', 'padding':'0rem 0.3rem',
                                 'vertical-align':'top', 'border-color':'rgba(0,0,0,0)',
                                 'color':'{}'.format(app_colors['plot1']), 'text-shadow':'none'
-                            }
+                            },
+                            n_clicks=0
                         ),
                         width=0.5
                     ),
@@ -123,7 +126,8 @@ tab1 = dbc.Card(
                                 'line-height':'1.2', 'padding':'0rem 0.3rem',
                                 'vertical-align':'top', 'border-color':'rgba(0,0,0,0)',
                                 'color':'{}'.format(app_colors['plot1']), 'text-shadow':'none'
-                            }
+                            },
+                            n_clicks=0
                         ),
                         width=0.5
                     ),
@@ -135,7 +139,8 @@ tab1 = dbc.Card(
                                 'line-height':'1.2', 'padding':'0rem 0.3rem',
                                 'vertical-align':'top', 'border-color':'rgba(0,0,0,0)',
                                 'color':'{}'.format(app_colors['plot1']), 'text-shadow':'none'
-                            }
+                            },
+                            n_clicks=0
                         ),
                         width=0.5
                     ),
@@ -147,7 +152,8 @@ tab1 = dbc.Card(
                                 'line-height':'1.2', 'padding':'0rem 0.3rem',
                                 'vertical-align':'top', 'border-color':'rgba(0,0,0,0)',
                                 'color':'{}'.format(app_colors['plot1']), 'text-shadow':'none'
-                            }
+                            },
+                            n_clicks=0
                         ),
                         width=0.5
                     ),
@@ -169,13 +175,12 @@ tab1 = dbc.Card(
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col(width=1),
                     dbc.Col(
                         html.H5(
-                            "Most Negative Tweets",
+                            "Word Cloud",
                             style={'text-align':'center', 'color':'{}'.format(app_colors['plot1'])}
                         ),
-                        width=5
+                        width=6
                     ),
                     dbc.Col(
                         html.H5(
@@ -187,15 +192,12 @@ tab1 = dbc.Card(
                 ],
                 justify='between'
             ),
-            html.Br(),
             dbc.Row(
                 [
-                    dbc.Col(width=1),
                     dbc.Col(
-                        html.Div(id='live-table'),
-                        width=5
+                        html.Div([html.Img(id="image-wc")]),
+                        width=6
                     ),
-                    dcc.Interval(id='table-update', interval=REFRESH),
                     dbc.Col(
                         dcc.Graph(id='live-pie', animate=False),
                         width=6
@@ -213,21 +215,25 @@ tab2 = dbc.Card(
         [
             dbc.Row(
                 [
+                    dbc.Col(width=1),
                     dbc.Col(
                         html.H5(
-                            "Word Cloud",
+                            "Most Negative Tweets",
                             style={'text-align':'center', 'color':'{}'.format(app_colors['plot1'])}
                         ),
-                        width=6
-                    ),            
+                        width=5
+                    ),
+                    dcc.Interval(id='neg-table-update', interval=REFRESH)          
                 ],
             justify='start'
             ),
+            html.Br(),
             dbc.Row(
                 [
+                    dbc.Col(width=1),
                     dbc.Col(
-                        html.Div([html.Img(id="image-wc")]),
-                        width=6
+                        html.Div(id='neg-live-table'),
+                        width=5
                     )
                 ]
             )
@@ -307,9 +313,53 @@ def update_terms(click, n, keyword):
     top_words = matrix.sum(axis=0).sort_values(ascending=False)
 
     imp_kw=pd.DataFrame(top_words.items(), columns=['word', 'freq'])
-    imp_kw=imp_kw[~ imp_kw['word'].str.contains(keyword.lower())].reset_index()
+    imp_kw=imp_kw[~ imp_kw['word'].str.contains('|'.join([keyword.lower(), "not"]))].reset_index()
     del imp_kw['index']
     return imp_kw.word[0], imp_kw.word[1], imp_kw.word[2], imp_kw.word[3], imp_kw.word[4]
+
+click1 = 0
+click2 = 0
+click3 = 0
+click4 = 0
+click5 = 0
+
+@app.callback(
+    Output('keyword', 'value'),
+    [Input('live-term1', 'n_clicks'),
+    Input('live-term2', 'n_clicks'),
+    Input('live-term3', 'n_clicks'),
+    Input('live-term4', 'n_clicks'),
+    Input('live-term5', 'n_clicks')],
+    [State('live-term1', 'children'),
+    State('live-term2', 'children'),
+    State('live-term3', 'children'),
+    State('live-term4', 'children'),
+    State('live-term5', 'children')]
+)
+def update_search(c1, c2, c3, c4, c5, keyword1, keyword2, keyword3, keyword4, keyword5):
+    global click1
+    global click2
+    global click3
+    global click4
+    global click5
+
+    if c1!=click1:
+        click1 +=1
+        return keyword1
+    elif c2!=click2:
+        click2 +=1
+        return keyword2
+    elif c3!=click3:
+        click3 +=1
+        return keyword3
+    elif c4!=click4:
+        click4 +=1
+        return keyword4
+    elif c5!=click5:
+        click5 +=1
+        return keyword5
+    else:
+        return "Trump"
 
 #%%
 # sentiment graph-----------------------------------------------------------
@@ -410,7 +460,8 @@ def generate_table(df):
             'color':app_colors["background"],
             'height': 'auto',
             'textAlign': 'center',
-            'border': '1px solid {}'.format(app_colors["plot4"])},
+            'border': '1px solid {}'.format(app_colors["plot4"]),
+            },
         style_cell_conditional=[
             {'if': {'column_id': 'tweet'},
             'width': '400px',
@@ -421,15 +472,17 @@ def generate_table(df):
             }],
         page_size=5,
         css=[
-            {'selector': '.previous-page, .next-page, .last-page, .first-page',
-            'rule': 'background-color: {};'.format(app_colors["plot4"])}
+                {
+                    'selector': '.previous-page, .next-page, .last-page, .first-page',
+                    'rule': 'background-color: {};'.format(app_colors["plot4"])
+                }
             ]
         )
 
 @app.callback(
-    Output('live-table', 'children'),
+    Output('neg-live-table', 'children'),
     [Input('term-search', 'n_clicks'),
-    Input('table-update', 'n_intervals')],
+    Input('neg-table-update', 'n_intervals')],
     [State('keyword', 'value')]
 )
 def update_negative_tweets(click, n, keyword):
@@ -527,7 +580,7 @@ def make_image(click, keyword):
     top_words = matrix.sum(axis=0).sort_values(ascending=False)
 
     dfm=pd.DataFrame(top_words.items(), columns=['word', 'freq'])
-    dfm=dfm[~ dfm['word'].str.contains(keyword.lower())]
+    dfm=dfm[~ dfm['word'].str.contains('|'.join([keyword.lower(), "not"]))]
 
     img = BytesIO()
     plot_wordcloud(data=dfm).save(img, format='PNG')
