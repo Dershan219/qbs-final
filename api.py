@@ -10,7 +10,6 @@ from keras.models import load_model
 from keras.preprocessing.sequence import pad_sequences
 from keras import backend as K
 import nltk
-nltk.download('stopwords')
 from nltk.corpus import stopwords
 import os
 import re

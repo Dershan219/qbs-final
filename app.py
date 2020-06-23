@@ -44,16 +44,21 @@ header = dbc.Navbar(
             dbc.NavbarBrand(
                 "Twitter Sentiment",
                 href="https://github.com/Dershan219/twitter-sentiment"),
+                style={'font-weight':'bold'},
                 md=2
                 ),
         dbc.Col(
             dbc.Input(
                 id='keyword', value='Trump',
-                type='text', placeholder="Search Term"),
+                type='text', placeholder="Search Term",
+                style={'height':'36px', 'margin-top':'0px'}),
                 md=9
                 ),
         dbc.Col(
-            dbc.Button("Search", color="primary"),
+            dbc.Button(
+                "Search", color="primary",
+                style={'height':'36px', 'margin-top':'0px', 'padding':'0rem 1rem'}
+                ),
             md=0.5
             )
     ],
@@ -83,19 +88,19 @@ body = dbc.Container(
                 dbc.Col(
                     html.H5(
                         "Most Negative Tweets",
-                        style={'text-align':'center', 'color':'{}'.format(app_colors['text'])}
+                        style={'text-align':'center', 'color':'{}'.format(app_colors['plot1'])}
                         ),
                     width=6),
                 dbc.Col(
                     html.H5(
                         "P/N Ratio",
-                        style={'text-align':'center', 'color':'{}'.format(app_colors['text'])}
+                        style={'text-align':'center', 'color':'{}'.format(app_colors['plot1'])}
                         ),
                     width=6),               
             ],
             justify='between'
         ),
-        html.Br(style={'margin-bottom':'2px'}),
+        html.Br(),
         dbc.Row(
             [
                 dbc.Col(html.Div(id='live-table'), width=6),
@@ -107,6 +112,22 @@ body = dbc.Container(
         )
     ]
 )
+
+footer = dbc.Container(
+    [
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(html.H6(
+                    "QBS Group 5",
+                    style={'text-align':'center', 'color':'{}'.format(app_colors['plot1'])}
+                    ), width = 6
+                )
+            ],
+            justify = 'center'
+        )
+    ])
+
 
 #%%
 # sentiment graph-----------------------------------------------------------
@@ -139,7 +160,7 @@ def update_graph(keyword, n):
     df['date'] = pd.to_datetime((df['time']/1000).astype(int), unit='s')
     df.set_index('date', inplace=True)
     
-    df = df.resample('30s').agg({"id":'size',"sentiment_smoothed":'mean'})
+    df = df.resample('10s').agg({"id":'size',"sentiment_smoothed":'mean'})
     df['id'].fillna(0, inplace=True)
     df['sentiment_smoothed'].fillna(method='ffill', inplace=True)
 
@@ -182,7 +203,7 @@ def update_graph(keyword, n):
         paper_bgcolor=app_colors["background"],
         title=dict(
             text='Keyword: {}'.format(keyword),
-            font=dict(color=app_colors["text"]),
+            font=dict(color=app_colors["plot1"]),
             x=0.5,
             y=0.9,
             xanchor='center',
@@ -289,7 +310,7 @@ def update_pie(keyword, n):
         layout=layout
     )
 
-app.layout = html.Div([header, body])
+app.layout = html.Div([header, body, footer])
 
 if __name__ == '__main__':
     app.run_server(debug=True)
