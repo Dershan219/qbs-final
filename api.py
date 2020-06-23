@@ -44,7 +44,7 @@ with open('tokenizer.pickle', 'rb') as handle:
     tokenizer = pickle.load(handle)
 
 stop_words = set(stopwords.words('english'))
-stop_words.add('rt')
+stop_words.update(['rt'])
 stop_words.remove('not')
 
 def preprocess(text):
@@ -92,6 +92,19 @@ class Listener(StreamListener):
                 "INSERT OR IGNORE INTO tweets (id, time, tweet, sentiment, keywords) VALUES (?, ?, ?, ?, ?)", 
                 (tweet_id, time_ts, tweet, sentiment, keywords))
             conn.commit()
+            c.execute(
+                """
+                DELETE FROM tweets
+                WHERE time in(
+                SELECT time
+                FROM(
+                SELECT time,
+                strftime('%M','now') - strftime('%M', datetime(time/1000, 'unixepoch')) as time_passed
+                FROM tweets
+                WHERE time_passed >= 2))
+                """
+            )
+            conn.commit()
         except KeyError as e:
             print(str(e))
 
@@ -110,6 +123,7 @@ while True:
     except Exception as e:
         print(str(e))
         time.sleep(5)
+
 #%%
 # utility functions--------------------------------------------------------
 # check out top 15 popular tweets
