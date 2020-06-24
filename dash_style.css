@@ -1,0 +1,22 @@
+/*datatable cell selection*/
+#neg-live-table .dash-spreadsheet-container .dash-spreadsheet-inner table {
+  --accent: #272B30 !important;
+  --selected-background: #272B30 !important;
+}
+
+/*datatable page buttons*/
+.dash-table-container .previous-next-container button.previous-page,
+.dash-table-container .previous-next-container button.next-page,
+.dash-table-container .previous-next-container button.first-page,
+.dash-table-container .previous-next-container button.last-page {
+  color: #FFFFFF !important;
+  background-color: #272B30 !important;
+}
+
+.dash-table-container .previous-next-container button.previous-page:hover,
+.dash-table-container .previous-next-container button.next-page:hover,
+.dash-table-container .previous-next-container button.first-page:hover,
+.dash-table-container .previous-next-container button.last-page:hover {
+  color: #AAAAAA !important;
+  background-color: #272B30 !important
+}
