@@ -39,15 +39,15 @@ app_colors = {
 LOGO = "https://help.twitter.com/content/dam/help-twitter/brand/logo.png"
 THEME = dbc.themes.SLATE
 REFRESH = 1000 # ms
+DASH_CSS = "./dash_style.css"
 
-app = dash.Dash(__name__,
-                external_stylesheets=[THEME])
+app = dash.Dash(__name__, external_stylesheets=[THEME, DASH_CSS])
 
 #%%
 # layout settings-----------------------------------------------------------
 header = dbc.Navbar(
     [
-        dbc.Col(html.Img(src=LOGO, height="30px"), md=0.5),
+        dbc.Col(html.Img(src=LOGO, height="36px"), md=0.5),
         dbc.Col(
             dbc.NavbarBrand(
                 "Twitter Sentiment",
@@ -59,8 +59,8 @@ header = dbc.Navbar(
             dbc.Input(
                 id='keyword', value='Trump',
                 type='text', placeholder="Search Term",
-                style={'height':'36px', 'margin-top':'0px'},
-                debounce=True),
+                style={'height':'36px', 'margin-top':'0px'}
+            ),
             md=9
         ),
         dbc.Col(
@@ -69,7 +69,8 @@ header = dbc.Navbar(
                 style={'height':'36px', 'margin-top':'0px', 'padding':'0rem 1rem'}
                 ),
             md=0.5
-        )
+        ),
+        html.Div(children=[""],id='input-temp', style={'display': 'none'})
     ],
     color="dark",
     dark=True,
@@ -87,7 +88,7 @@ tab1 = dbc.Card(
                             "Related Terms: ",
                             style={
                                 'color':'{}'.format(app_colors['plot5']), 'font-weight':'bold',
-                                'margin-right':'0.3rem', 'padding':'0.1rem'}
+                                'margin-right':'0.3rem', 'padding':'0.1rem', 'font-size':'1rem'}
                         ),
                         width=1.5
                     ),
@@ -99,6 +100,7 @@ tab1 = dbc.Card(
                             style={
                                 'line-height':'1.2', 'padding':'0rem 0.3rem',
                                 'vertical-align':'top', 'border-color':'rgba(0,0,0,0)',
+                                'font-size':'1rem',
                                 'color':'{}'.format(app_colors['plot1']), 'text-shadow':'none'
                             },
                             n_clicks=0      
@@ -112,6 +114,7 @@ tab1 = dbc.Card(
                             style={
                                 'line-height':'1.2', 'padding':'0rem 0.3rem',
                                 'vertical-align':'top', 'border-color':'rgba(0,0,0,0)',
+                                'font-size':'1rem',
                                 'color':'{}'.format(app_colors['plot1']), 'text-shadow':'none'
                             },
                             n_clicks=0
@@ -125,6 +128,7 @@ tab1 = dbc.Card(
                             style={
                                 'line-height':'1.2', 'padding':'0rem 0.3rem',
                                 'vertical-align':'top', 'border-color':'rgba(0,0,0,0)',
+                                'font-size':'1rem',
                                 'color':'{}'.format(app_colors['plot1']), 'text-shadow':'none'
                             },
                             n_clicks=0
@@ -138,6 +142,7 @@ tab1 = dbc.Card(
                             style={
                                 'line-height':'1.2', 'padding':'0rem 0.3rem',
                                 'vertical-align':'top', 'border-color':'rgba(0,0,0,0)',
+                                'font-size':'1rem',
                                 'color':'{}'.format(app_colors['plot1']), 'text-shadow':'none'
                             },
                             n_clicks=0
@@ -151,6 +156,7 @@ tab1 = dbc.Card(
                             style={
                                 'line-height':'1.2', 'padding':'0rem 0.3rem',
                                 'vertical-align':'top', 'border-color':'rgba(0,0,0,0)',
+                                'font-size':'1rem',
                                 'color':'{}'.format(app_colors['plot1']), 'text-shadow':'none'
                             },
                             n_clicks=0
@@ -198,6 +204,7 @@ tab1 = dbc.Card(
                         html.Div([html.Img(id="image-wc")]),
                         width=6
                     ),
+                    dcc.Interval(id='wc-update', interval=10*REFRESH),
                     dbc.Col(
                         dcc.Graph(id='live-pie', animate=False),
                         width=6
@@ -223,7 +230,14 @@ tab2 = dbc.Card(
                         ),
                         width=5
                     ),
-                    dcc.Interval(id='neg-table-update', interval=REFRESH)          
+                    dcc.Interval(id='neg-table-update', interval=30*REFRESH),
+                                        dbc.Col(
+                        html.H5(
+                            "Most Positive Tweets",
+                            style={'text-align':'center', 'color':'{}'.format(app_colors['plot1'])}
+                        ),
+                        width=5
+                    )
                 ],
             justify='start'
             ),
@@ -241,13 +255,59 @@ tab2 = dbc.Card(
     )
 )
 
+tab3 = dbc.Card(
+    dbc.CardBody(
+        [
+            dbc.Row(
+                [
+                    dbc.Col(
+                        html.H4(
+                            "About the Dashboard",
+                            style={'text-align':'center', 'color':'{}'.format(app_colors['plot1'])}
+                        ),
+                        width = 6
+                    )
+                ],
+                justify = 'center'
+            ),
+            html.Br(),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        html.H5(
+                            "Training the Model",
+                            style={'text-align':'center', 'color':'{}'.format(app_colors['plot1'])}
+                        ),
+                        width = 4
+                    ),
+                    dbc.Col(
+                        html.H5(
+                            "Streaming from Twitter",
+                            style={'text-align':'center', 'color':'{}'.format(app_colors['plot1'])}
+                        ),
+                        width = 4
+                    ),
+                    dbc.Col(
+                        html.H5(
+                            "Building the Dashboard",
+                            style={'text-align':'center', 'color':'{}'.format(app_colors['plot1'])}
+                        ),
+                        width = 4
+                    )
+                ]
+            )
+        ]
+    )
+)
+
 body = dbc.Container(
     [
         html.Br(),
         dbc.Tabs(
             [
                 dbc.Tab(tab1, label="Overview", tab_style={'margin-left':'auto'}),
-                dbc.Tab(tab2, label="Dig Deeper!")
+                dbc.Tab(tab2, label="Dig Deeper!"),
+                dbc.Tab(tab3, label="About")
             ]
         )
     ]
@@ -272,14 +332,17 @@ footer = dbc.Container(
 
 #%%
 # related terms-------------------------------------------------------------
-# stopwords = set(STOPWORDS)
-# stopwords.update(['not'])
-
 def tokenize(text):
     tokens = word_tokenize(text)
     stems = []
     for item in tokens: stems.append(PorterStemmer().stem(item))
     return stems
+
+@app.callback(Output('input-temp', 'children'),
+              [Input('term-search', 'n_clicks')],
+              [State('keyword', 'value')])
+def update_temp(click, keyword):
+    return keyword
 
 @app.callback(
     [Output('live-term1', 'children'),
@@ -288,8 +351,8 @@ def tokenize(text):
     Output('live-term4', 'children'),
     Output('live-term5', 'children')],
     [Input('term-search', 'n_clicks'),
-    Input('term-update', 'n_intervals')],
-    [State('keyword', 'value')]
+    Input('term-update', 'n_intervals'),
+    Input('input-temp', 'children')]
 )
 def update_terms(click, n, keyword):
     conn = sqlite3.connect('twitter.db')
@@ -312,11 +375,13 @@ def update_terms(click, n, keyword):
     # sum over each document (axis=0)
     top_words = matrix.sum(axis=0).sort_values(ascending=False)
 
-    imp_kw=pd.DataFrame(top_words.items(), columns=['word', 'freq'])
-    imp_kw=imp_kw[~ imp_kw['word'].str.contains('|'.join([keyword.lower(), "not"]))].reset_index()
+    imp_kw = pd.DataFrame(top_words.items(), columns=['word', 'freq'])
+    rm_kw = [keyword.lower(), "not"]
+    imp_kw = imp_kw[~ imp_kw['word'].str.contains('|'.join(rm_kw))].reset_index()
     del imp_kw['index']
     return imp_kw.word[0], imp_kw.word[1], imp_kw.word[2], imp_kw.word[3], imp_kw.word[4]
 
+# change input into related terms
 click1 = 0
 click2 = 0
 click3 = 0
@@ -336,7 +401,7 @@ click5 = 0
     State('live-term4', 'children'),
     State('live-term5', 'children')]
 )
-def update_search(c1, c2, c3, c4, c5, keyword1, keyword2, keyword3, keyword4, keyword5):
+def update_search(c1, c2, c3, c4, c5, kw1, kw2, kw3, kw4, kw5):
     global click1
     global click2
     global click3
@@ -345,19 +410,19 @@ def update_search(c1, c2, c3, c4, c5, keyword1, keyword2, keyword3, keyword4, ke
 
     if c1!=click1:
         click1 +=1
-        return keyword1
+        return kw1
     elif c2!=click2:
         click2 +=1
-        return keyword2
+        return kw2
     elif c3!=click3:
         click3 +=1
-        return keyword3
+        return kw3
     elif c4!=click4:
         click4 +=1
-        return keyword4
+        return kw4
     elif c5!=click5:
         click5 +=1
-        return keyword5
+        return kw5
     else:
         return "Trump"
 
@@ -366,8 +431,8 @@ def update_search(c1, c2, c3, c4, c5, keyword1, keyword2, keyword3, keyword4, ke
 @app.callback(
     Output('live-graph', 'figure'),
     [Input('term-search', 'n_clicks'),
-    Input('graph-update', 'n_intervals')],
-    [State('keyword', 'value')]
+    Input('graph-update', 'n_intervals'),
+    Input('input-temp', 'children')]
 )
 def update_graph(click, n, keyword):
     conn = sqlite3.connect('twitter.db')
@@ -393,6 +458,7 @@ def update_graph(click, n, keyword):
         name='Scatter',
         mode='lines',
         line=dict(color=app_colors["plot1"], width=3),
+        hovertemplate = "<b>%{x}<br>Sentiment Score: %{y}<extra></extra>",
         yaxis='y')
 
     data2 = go.Bar(
@@ -402,6 +468,7 @@ def update_graph(click, n, keyword):
         marker=dict(
             color=app_colors["text"], opacity=0.8,
             line=dict(width=0)),
+        hovertemplate = "<b>%{x}<br># of Tweets: %{y}<extra></extra>",
         yaxis='y2')
 
     layout = go.Layout(
@@ -426,11 +493,11 @@ def update_graph(click, n, keyword):
             text='Keyword: {}'.format(keyword),
             font=dict(color=app_colors["plot1"]),
             x=0.5,
-            y=1,
+            y=0.95,
             xanchor='center',
             yanchor='top'),
         margin=go.layout.Margin(
-            t=30,
+            t=40,
             l=50,
             r=50,
             pad=15
@@ -441,67 +508,12 @@ def update_graph(click, n, keyword):
         layout=layout)
 
 #%%
-#most negative tweets-------------------------------------------------------
-def generate_table(df):
-    return dash_table.DataTable(
-        id='live-table',
-        columns=[{"name": i, "id": i, "selectable":True} for i in df.columns],
-        data=df.to_dict('records'),
-        filter_action="native",
-        sort_action="native",
-        style_header={
-            'backgroundColor':app_colors["plot3"],
-            'color':app_colors["plot1"],
-            'fontWeight': 'bold',
-            'textAlign': 'center',
-            'border-bottom': '2px solid {}'.format(app_colors["plot4"])},
-        style_cell={
-            'backgroundColor':app_colors["text"],
-            'color':app_colors["background"],
-            'height': 'auto',
-            'textAlign': 'center',
-            'border': '1px solid {}'.format(app_colors["plot4"]),
-            },
-        style_cell_conditional=[
-            {'if': {'column_id': 'tweet'},
-            'width': '400px',
-            'minWidth': '400px',
-            'maxWidth': '400px',
-            'whiteSpace': 'normal',
-            'textAlign': 'left'
-            }],
-        page_size=5,
-        css=[
-                {
-                    'selector': '.previous-page, .next-page, .last-page, .first-page',
-                    'rule': 'background-color: {};'.format(app_colors["plot4"])
-                }
-            ]
-        )
-
-@app.callback(
-    Output('neg-live-table', 'children'),
-    [Input('term-search', 'n_clicks'),
-    Input('neg-table-update', 'n_intervals')],
-    [State('keyword', 'value')]
-)
-def update_negative_tweets(click, n, keyword):
-    conn = sqlite3.connect('twitter.db')
-    df = pd.read_sql(
-        'SELECT tweet, sentiment FROM tweets WHERE tweet LIKE ? ORDER BY sentiment LIMIT 30',
-        conn, params=('%' + keyword + '%', )
-    )
-    df['tweet'] = df['tweet'].apply(lambda x: re.sub(r"RT|@\S+|\Whttps:\S+|\Whttp:\S+|\.\.\.",' ', x))
-    df['sentiment'] = df['sentiment'].apply(lambda x: re.sub("(?<=....)(.*?)(?=e.+)", '', str(x))).astype(float)
-    return generate_table(df)
-
-#%%
-# P/N Ratio
+# P/N Ratio-----------------------------------------------------------------
 @app.callback(
     Output('live-pie', 'figure'),
     [Input('term-search', 'n_clicks'),
-    Input('pie-update', 'n_intervals')],
-    [State('keyword', 'value')]
+    Input('pie-update', 'n_intervals'),
+    Input('input-temp', 'children')]
 )
 def update_pie(click, n, keyword):
     conn = sqlite3.connect('twitter.db')
@@ -516,7 +528,8 @@ def update_pie(click, n, keyword):
     data = go.Pie(
         labels=['positive', 'negative'],
         values=sentiment,
-        texttemplate = "<b>%{label}: %{value} <br>%{percent}",
+        texttemplate = "<b>%{label} <br>%{percent}",
+        hovertemplate = "<b>%{value} %{label} tweets<extra></extra>",
         marker=dict(colors=[app_colors['text'], app_colors['plot2']])
     )
 
@@ -555,10 +568,11 @@ def plot_wordcloud(data):
 
 @app.callback(
     Output('image-wc', 'src'), 
-    [Input('term-search', 'n_clicks')],
-    [State('keyword', 'value')]
+    [Input('term-search', 'n_clicks'),
+    Input('wc-update', 'n_intervals'),
+    Input('input-temp', 'children')]
 )
-def make_image(click, keyword):
+def make_image(click, n, keyword):
     conn = sqlite3.connect('twitter.db')
     df = pd.read_sql(
         "SELECT tweet, keywords FROM tweets WHERE tweet LIKE ? ORDER BY time DESC LIMIT 2000",
@@ -586,6 +600,71 @@ def make_image(click, keyword):
     plot_wordcloud(data=dfm).save(img, format='PNG')
 
     return 'data:image/png;base64,{}'.format(base64.b64encode(img.getvalue()).decode())
+
+#%%
+#most negative tweets-------------------------------------------------------
+def generate_table(df):
+    return dash_table.DataTable(
+        id='live-table',
+        columns=[{"name": i, "id": i, "selectable":True} for i in df.columns],
+        data=df.to_dict('records'),
+        filter_action="native",
+        sort_action="native",
+        style_header={
+            'backgroundColor':app_colors["plot3"],
+            'color':app_colors["plot1"],
+            'fontWeight': 'bold',
+            'textAlign': 'center',
+            'border-bottom': '2px solid {}'.format(app_colors["plot4"]),
+            'fontSize':14,
+            'font-family':'Segoe UI'
+        },
+        style_cell={
+            'backgroundColor':app_colors["text"],
+            'color':app_colors["background"],
+            'height': 'auto',
+            'textAlign': 'center',
+            'border': '1px solid {}'.format(app_colors["plot4"]),
+            'fontSize':14,
+            'font-family':'Segoe UI'
+        },
+        style_cell_conditional=[
+            {'if': {'column_id': 'tweet'},
+            'width': '370px',
+            'minWidth': '370px',
+            'maxWidth': '370px',
+            'whiteSpace': 'normal',
+            'textAlign': 'left'
+            }
+        ],
+        style_filter={
+            'fontSize':14,
+            'font-family':'sans-serif'
+        },
+        page_size=5,
+        css=[
+                {
+                    'selector': '.previous-page, .next-page, .last-page, .first-page',
+                    'rule': 'background-color: {};'.format(app_colors["plot4"])
+                }
+            ]
+        )
+
+@app.callback(
+    Output('neg-live-table', 'children'),
+    [Input('term-search', 'n_clicks'),
+    Input('neg-table-update', 'n_intervals'),
+    Input('input-temp', 'children')]
+)
+def update_negative_tweets(click, n, keyword):
+    conn = sqlite3.connect('twitter.db')
+    df = pd.read_sql(
+        'SELECT tweet, sentiment FROM tweets WHERE tweet LIKE ? ORDER BY sentiment LIMIT 30',
+        conn, params=('%' + keyword + '%', )
+    )
+    df['tweet'] = df['tweet'].apply(lambda x: re.sub(r"RT|@\S+|\Whttps:\S+|\Whttp:\S+|\.\.\.",' ', x))
+    df['sentiment'] = df['sentiment'].apply(lambda x: re.sub("(?<=....)(.*?)(?=e.+)", '', str(x))).astype(float)
+    return generate_table(df)
 
 #%%
 app.layout = html.Div([header, body, footer])
