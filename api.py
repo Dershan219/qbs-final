@@ -15,7 +15,7 @@ import os
 import re
 import pickle
 
-os.chdir('C://Users/Andy/Desktop/NTU Courses/Quantitative Business Science/Project/twitter-sentiment')
+os.chdir('/Users/julieta/Desktop/twitter-sentiment')
 consumer_key = "C4dNIgkl43788sKKZ7iNZZy3w"
 consumer_secret = "QBfEpERH8d6IdVCPBs4SQaLWfiXgG2b3KRGIV8QrJrBUNJWF2k"
 access_token = "712293623665045505-c2NWLT2AQqLVRRS8jcRKxyyHsQ1kpG6"
@@ -73,11 +73,32 @@ class Listener(StreamListener):
         try:
             self.cnt += 1
             tweet_data = json.loads(data)
+            # print(tweet_data)
             tweet_id = str(tweet_data['id_str'])
-            try:
-                tweet = unidecode(tweet_data['extended_tweet']['full_text'])
-            except Exception as e:
-                tweet = unidecode(tweet_data['text'])
+
+            if 'retweeted_status' in tweet_data:
+                if 'extended_tweet' in tweet_data['retweeted_status']:
+                    tweet = unidecode(tweet_data['retweeted_status']['extended_tweet']['full_text'])
+                else:
+                    tweet = unidecode(tweet_data['retweeted_status']['text'])
+            else:
+                if 'extended_tweet' in tweet_data:
+                    tweet = unidecode(tweet_data['extended_tweet']['full_text'])
+                else:
+                    tweet = unidecode(tweet_data['text'])
+            # try:
+            #     try:
+            #         tweet = unidecode(tweet_data.retweeted_status.extended_tweet.full_text)
+            #     except Exception as e:
+            #         tweet = unidecode(tweet_data.retweeted_status.text)
+
+            # except:
+            #     try:
+            #         tweet = unidecode(tweet_data.extended_tweet.full_text)
+            #     except AttributeError:
+            #         tweet = unidecode(tweet_data['text'])
+            
+
             time_ts = tweet_data['timestamp_ms']
             time_dt = tweet_data['created_at']
             # sentiment = analyzer.polarity_scores(tweet)['compound'] # calculate sentiment scores
@@ -119,6 +140,7 @@ while True:
         auth = OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_secret)
         twitter_stream = Stream(auth, Listener(), tweet_mode='extended')
+        # print(twitter_stream)
         twitter_stream.filter(languages=["en"], track=["a","e","i","o","u"])
     except Exception as e:
         print(str(e))
