@@ -775,6 +775,35 @@ def update_output(click, value):
             return round(sentiment, 4)
 
 #%%
+#most postive tweets-------------------------------------------------------
+@app.callback(
+    Output('postive-live-table', 'children'),
+    [Input('term-search', 'n_clicks'),
+    Input('postive-table-update', 'n_intervals'),
+    Input('input-temp', 'children')]
+)
+def update_postive_tweets(click, n, keyword):
+    conn = sqlite3.connect('twitter.db')
+    df = pd.read_sql(
+        'SELECT tweet, sentiment FROM tweets WHERE tweet LIKE ? ORDER BY sentiment DESC LIMIT 30',
+        conn, params=('%' + keyword + '%', )
+    )
+    df['tweet'] = df['tweet'].apply(lambda x: re.sub(r"RT|@\S+|\Whttps:\S+|\Whttp:\S+|\.\.\.",' ', x))
+    df['sentiment'] = df['sentiment'].apply(lambda x: round(x, 4)).astype(float)
+    return generate_table(df)
+
+@app.callback(
+    Output('model-output', 'children'),
+    [Input('model-submit', 'n_clicks')],
+    [State('model-input', 'value')]
+)
+def update_output(click, value):
+    if click > 0:
+        test = preprocess(value)[1]
+        sentiment = float(model.predict(test, batch_size=1024)[0][0])
+        return round(sentiment, 4)
+
+#%%
 app.layout = html.Div([header, body, footer])
 
 if __name__ == '__main__':
