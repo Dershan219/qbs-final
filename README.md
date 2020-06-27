@@ -20,7 +20,7 @@ This tool is for collecting and analysing tweet, by LSTM model, which can let yo
 - scikit_learn==0.23.1
 
 
-## Chrome driver
+## NLTK Package Requirement
 Once you download them in your python, you needn't to do it again.
  
  ```python
