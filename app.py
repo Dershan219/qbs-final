@@ -260,7 +260,6 @@ tab2 = dbc.Card(
         [
             dbc.Row(
                 [
-                    dbc.Col(width=1),
                     dbc.Col(
                         html.H5(
                             "Most Negative Tweets",
@@ -268,26 +267,33 @@ tab2 = dbc.Card(
                         ),
                         width=5
                     ),
-                    dcc.Interval(id='neg-table-update', interval=30*REFRESH),
-                                        dbc.Col(
+                    dcc.Interval(id='neg-table-update', interval=60*REFRESH),
+                    dbc.Col(width=1),
+                    dbc.Col(
                         html.H5(
                             "Most Positive Tweets",
                             style={'text-align':'center', 'color':'{}'.format(app_colors['plot1'])}
                         ),
                         width=5
-                    )
+                    ),
+                    dcc.Interval(id='positive-table-update', interval=60*REFRESH)
                 ],
-                justify='start'
+                justify='center'
             ),
             html.Br(),
             dbc.Row(
                 [
-                    dbc.Col(width=1),
                     dbc.Col(
                         html.Div(id='neg-live-table'),
                         width=5
+                    ),
+                    dbc.Col(width=1),
+                    dbc.Col(
+                        html.Div(id='positive-live-table'),
+                        width=5
                     )
-                ]
+                ],
+                justify = 'center'
             )
         ]
     )
@@ -760,6 +766,25 @@ def update_negative_tweets(click, n, keyword):
     df['sentiment'] = df['sentiment'].apply(lambda x: re.sub("(?<=....)(.*?)(?=e.+)", '', str(x)) if x<=1e-4 else round(x, 4)).astype(float)
     return generate_table(df)
 
+#%%
+# most postive tweets-------------------------------------------------------
+@app.callback(
+    Output('positive-live-table', 'children'),
+    [Input('term-search', 'n_clicks'),
+    Input('positive-table-update', 'n_intervals'),
+    Input('input-temp', 'children')]
+)
+def update_positive_tweets(click, n, keyword):
+    conn = sqlite3.connect('twitter.db')
+    df = pd.read_sql(
+        'SELECT tweet, sentiment FROM tweets WHERE tweet LIKE ? ORDER BY sentiment DESC LIMIT 30',
+        conn, params=('%' + keyword + '%', )
+    )
+    df['tweet'] = df['tweet'].apply(lambda x: re.sub(r"RT|@\S+|\Whttps:\S+|\Whttp:\S+|\.\.\.",' ', x))
+    df['sentiment'] = df['sentiment'].apply(lambda x: round(x, 4)).astype(float)
+    return generate_table(df)
+#%%
+# test model----------------------------------------------------------------
 @app.callback(
     Output('model-output', 'children'),
     [Input('model-submit', 'n_clicks')],
