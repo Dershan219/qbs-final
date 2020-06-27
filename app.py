@@ -12,10 +12,15 @@ import sqlite3
 import time
 import os
 import re
+import pickle
 from io import BytesIO
 from wordcloud import WordCloud, STOPWORDS
 import base64
 from sklearn.feature_extraction.text import TfidfVectorizer
+from tensorflow.keras.models import load_model
+from keras.preprocessing.sequence import pad_sequences
+from keras import backend as K
+from nltk.corpus import stopwords
 from nltk import word_tokenize
 from nltk.stem.porter import PorterStemmer
 from PIL import Image, ImageOps
@@ -39,6 +44,40 @@ LOGO = "https://help.twitter.com/content/dam/help-twitter/brand/logo.png"
 THEME = dbc.themes.SLATE
 REFRESH = 1000 # ms
 DASH_CSS = "./dash_style.css"
+
+# preparing LSTM model------------------------------------------------------
+def jaccard_distance_loss(y_true, y_pred, smooth=100):
+    intersection = K.sum(K.abs(y_true * y_pred), axis=-1)
+    sum_ = K.sum(K.abs(y_true) + K.abs(y_pred), axis=-1)
+    jac = (intersection + smooth) / (sum_ - intersection + smooth)
+    return (1 - jac) * smooth
+
+def jaccard_coef(y_true, y_pred, smooth=1e-12):
+    intersection = K.sum(y_true * y_pred, axis=[0, -1, -2])
+    sum_ = K.sum(y_true + y_pred, axis=[0, -1, -2])
+    jac = (intersection + smooth) / (sum_ - intersection + smooth)
+    return K.mean(jac)
+
+model = load_model(
+    'train_model_LSTM.h5',
+    custom_objects={
+        'jaccard_distance_loss':jaccard_distance_loss,
+        'jaccard_coef':jaccard_coef})
+
+with open('tokenizer.pickle', 'rb') as handle:
+    tokenizer = pickle.load(handle)
+
+stop_words = set(stopwords.words('english'))
+stop_words.update(['rt', 'amp'])
+stop_words.remove('not')
+
+def preprocess(text):
+    review=re.sub(r"RT |@\S+ |https:\S+|http:\S+|[^a-zA-Z0-9' ]",' ',text)
+    review=review.lower()
+    review=review.split()
+    review=[word for word in review if not word in stop_words]
+    review_tokenized=pad_sequences(tokenizer.texts_to_sequences([review]), maxlen=300)
+    return review, review_tokenized
 
 app = dash.Dash(__name__, external_stylesheets=[THEME, DASH_CSS])
 
@@ -238,7 +277,7 @@ tab2 = dbc.Card(
                         width=5
                     )
                 ],
-            justify='start'
+                justify='start'
             ),
             html.Br(),
             dbc.Row(
@@ -255,6 +294,61 @@ tab2 = dbc.Card(
 )
 
 tab3 = dbc.Card(
+    dbc.CardBody(
+        [
+            dbc.Row(
+                [
+                    dbc.Col(
+                        dbc.Textarea(
+                            id='model-input', value='Test Out Our Model!',
+                            placeholder="Input Text",
+                            style={'height':'200px', 'margin-top':'0px'}
+                        ),
+                        width = 6
+                    )
+                ],
+                justify = 'center'
+            ),
+            html.Br(),
+            dbc.Row(
+                [
+                    dbc.Button(
+                        'Submit', id='model-submit', n_clicks=0, color="primary",
+                        style={'height':'36px', 'margin-top':'0px', 'padding':'0rem 1rem'}
+                    )
+                ],
+                justify = 'center'
+            ),
+            html.Br(),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        html.H6(
+                            "Score: ",
+                            style={
+                                'text-align':'right', 'font-size':'1rem',
+                                'color':'{}'.format(app_colors['plot1'])}
+                        ),
+                        width = 1
+                    ),
+                    dbc.Col(
+                        html.Div(
+                            children=[""], id='model-output',
+                            style={
+                                'text-align':'left', 'margin-left':'0.5rem',
+                                'font-size':'1rem', 'line-height':'1.3',
+                                'color':'{}'.format(app_colors['plot1'])}),
+                        width = 1
+                    )
+                ],
+                justify = 'center',
+                no_gutters=True
+            )
+        ]
+    )
+)
+
+tab4 = dbc.Card(
     dbc.CardBody(
         [
             dbc.Row(
@@ -306,12 +400,12 @@ body = dbc.Container(
             [
                 dbc.Tab(tab1, label="Overview", tab_style={'margin-left':'auto'}),
                 dbc.Tab(tab2, label="Dig Deeper!"),
-                dbc.Tab(tab3, label="About")
+                dbc.Tab(tab3, label="Our Model"),
+                dbc.Tab(tab4, label="About")
             ]
         )
     ]
 )
-
 
 footer = dbc.Container(
     [
@@ -593,7 +687,8 @@ def make_image(click, n, keyword):
     top_words = matrix.sum(axis=0).sort_values(ascending=False)
 
     dfm=pd.DataFrame(top_words.items(), columns=['word', 'freq'])
-    dfm=dfm[~ dfm['word'].str.contains('|'.join([keyword.lower(), "not"]))]
+    rm_kw = [keyword.lower(), "not"]
+    dfm=dfm[~ dfm['word'].str.contains('|'.join(rm_kw))]
 
     img = BytesIO()
     plot_wordcloud(data=dfm).save(img, format='PNG')
@@ -664,6 +759,20 @@ def update_negative_tweets(click, n, keyword):
     df['tweet'] = df['tweet'].apply(lambda x: re.sub(r"RT|@\S+|\Whttps:\S+|\Whttp:\S+|\.\.\.",' ', x))
     df['sentiment'] = df['sentiment'].apply(lambda x: re.sub("(?<=....)(.*?)(?=e.+)", '', str(x))).astype(float)
     return generate_table(df)
+
+@app.callback(
+    Output('model-output', 'children'),
+    [Input('model-submit', 'n_clicks')],
+    [State('model-input', 'value')]
+)
+def update_output(click, value):
+    if click > 0:
+        test = preprocess(value)[1]
+        sentiment = float(model.predict(test, batch_size=1024)[0][0])
+        if sentiment <= 1e-5:
+            return re.sub("(?<=....)(.*?)(?=e.+)", '', str(sentiment))
+        else:
+            return round(sentiment, 3)
 
 #%%
 app.layout = html.Div([header, body, footer])
