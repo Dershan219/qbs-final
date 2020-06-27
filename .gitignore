@@ -1,5 +1,4 @@
 *.db
 *.docx
 __pycache__/
-*.h5
 *.DS_Store
