@@ -16,7 +16,6 @@ from io import BytesIO
 from wordcloud import WordCloud, STOPWORDS
 import base64
 from sklearn.feature_extraction.text import TfidfVectorizer
-import nltk
 from nltk import word_tokenize
 from nltk.stem.porter import PorterStemmer
 from PIL import Image, ImageOps
