@@ -1,5 +1,5 @@
 # QBS-Final
-This tool is for collecting and analysing tweet, by LSTM model, which can let you know how others reac to the topic you are into.  
+This tool is for collecting and analysing tweet, by LSTM model, which can let you know how others react to the topic you are into.  
 
 ## Requirements
 - Keras 2.3.1
