@@ -335,7 +335,7 @@ tab3 = dbc.Card(
                         html.Div(
                             children=[""], id='model-output',
                             style={
-                                'text-align':'left', 'margin-left':'0.5rem',
+                                'text-align':'left', 'margin-left':'0.4rem',
                                 'font-size':'1rem', 'line-height':'1.3',
                                 'color':'{}'.format(app_colors['plot1'])}),
                         width = 1
@@ -757,7 +757,7 @@ def update_negative_tweets(click, n, keyword):
         conn, params=('%' + keyword + '%', )
     )
     df['tweet'] = df['tweet'].apply(lambda x: re.sub(r"RT|@\S+|\Whttps:\S+|\Whttp:\S+|\.\.\.",' ', x))
-    df['sentiment'] = df['sentiment'].apply(lambda x: re.sub("(?<=....)(.*?)(?=e.+)", '', str(x))).astype(float)
+    df['sentiment'] = df['sentiment'].apply(lambda x: re.sub("(?<=....)(.*?)(?=e.+)", '', str(x)) if x<=1e-4 else round(x, 4)).astype(float)
     return generate_table(df)
 
 @app.callback(
@@ -769,10 +769,10 @@ def update_output(click, value):
     if click > 0:
         test = preprocess(value)[1]
         sentiment = float(model.predict(test, batch_size=1024)[0][0])
-        if sentiment <= 1e-5:
+        if sentiment <= 1e-4:
             return re.sub("(?<=....)(.*?)(?=e.+)", '', str(sentiment))
         else:
-            return round(sentiment, 3)
+            return round(sentiment, 4)
 
 #%%
 app.layout = html.Div([header, body, footer])
