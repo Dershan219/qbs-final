@@ -6,10 +6,9 @@ import time
 from unidecode import unidecode
 import json
 import sqlite3
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 from keras.preprocessing.sequence import pad_sequences
 from keras import backend as K
-import nltk
 from nltk.corpus import stopwords
 import os
 import re
@@ -44,7 +43,7 @@ with open('tokenizer.pickle', 'rb') as handle:
     tokenizer = pickle.load(handle)
 
 stop_words = set(stopwords.words('english'))
-stop_words.update(['rt'])
+stop_words.update(['rt', 'amp'])
 stop_words.remove('not')
 
 def preprocess(text):
@@ -74,10 +73,18 @@ class Listener(StreamListener):
             self.cnt += 1
             tweet_data = json.loads(data)
             tweet_id = str(tweet_data['id_str'])
-            try:
-                tweet = unidecode(tweet_data['extended_tweet']['full_text'])
-            except Exception as e:
-                tweet = unidecode(tweet_data['text'])
+
+            if 'retweeted_status' in tweet_data:
+                if 'extended_tweet' in tweet_data['retweeted_status']:
+                    tweet = unidecode(tweet_data['retweeted_status']['extended_tweet']['full_text'])
+                else:
+                    tweet = unidecode(tweet_data['retweeted_status']['text'])
+            else:
+                if 'extended_tweet' in tweet_data:
+                    tweet = unidecode(tweet_data['extended_tweet']['full_text'])
+                else:
+                    tweet = unidecode(tweet_data['text'])
+
             time_ts = tweet_data['timestamp_ms']
             time_dt = tweet_data['created_at']
             # sentiment = analyzer.polarity_scores(tweet)['compound'] # calculate sentiment scores
