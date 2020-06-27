@@ -269,13 +269,14 @@ tab2 = dbc.Card(
                         width=5
                     ),
                     dcc.Interval(id='neg-table-update', interval=30*REFRESH),
-                                        dbc.Col(
+                    dbc.Col(
                         html.H5(
                             "Most Positive Tweets",
                             style={'text-align':'center', 'color':'{}'.format(app_colors['plot1'])}
                         ),
                         width=5
-                    )
+                    ),
+                    dcc.Interval(id='postivie-table-update', interval=30*REFRESH)
                 ],
                 justify='start'
             ),
@@ -285,6 +286,10 @@ tab2 = dbc.Card(
                     dbc.Col(width=1),
                     dbc.Col(
                         html.Div(id='neg-live-table'),
+                        width=5
+                    ),
+                    dbc.Col(
+                        html.Div(id='postive-live-table'),
                         width=5
                     )
                 ]
@@ -760,20 +765,6 @@ def update_negative_tweets(click, n, keyword):
     df['sentiment'] = df['sentiment'].apply(lambda x: re.sub("(?<=....)(.*?)(?=e.+)", '', str(x)) if x<=1e-4 else round(x, 4)).astype(float)
     return generate_table(df)
 
-@app.callback(
-    Output('model-output', 'children'),
-    [Input('model-submit', 'n_clicks')],
-    [State('model-input', 'value')]
-)
-def update_output(click, value):
-    if click > 0:
-        test = preprocess(value)[1]
-        sentiment = float(model.predict(test, batch_size=1024)[0][0])
-        if sentiment <= 1e-4:
-            return re.sub("(?<=....)(.*?)(?=e.+)", '', str(sentiment))
-        else:
-            return round(sentiment, 4)
-
 #%%
 #most postive tweets-------------------------------------------------------
 @app.callback(
@@ -801,7 +792,10 @@ def update_output(click, value):
     if click > 0:
         test = preprocess(value)[1]
         sentiment = float(model.predict(test, batch_size=1024)[0][0])
-        return round(sentiment, 4)
+        if sentiment <= 1e-4:
+            return re.sub("(?<=....)(.*?)(?=e.+)", '', str(sentiment))
+        else:
+            return round(sentiment, 4)
 
 #%%
 app.layout = html.Div([header, body, footer])
