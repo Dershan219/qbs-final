@@ -1,5 +1,5 @@
-# QBS-Final
-This tool is for collecting and analysing tweet, by LSTM model, which can let you know how others react to the topic you are into.  
+# Twitter Sentiment Dashboard
+This tool is for collecting and analyzing tweets using a self-trained LSTM model, which can let you know how others react to the topic you are into.  
 
 ## Requirements
 - Keras 2.3.1
