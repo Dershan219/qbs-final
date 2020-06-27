@@ -276,7 +276,7 @@ tab2 = dbc.Card(
                         ),
                         width=5
                     ),
-                    dcc.Interval(id='postivie-table-update', interval=30*REFRESH)
+                    dcc.Interval(id='positive-table-update', interval=30*REFRESH)
                 ],
                 justify='start'
             ),
@@ -289,7 +289,7 @@ tab2 = dbc.Card(
                         width=5
                     ),
                     dbc.Col(
-                        html.Div(id='postive-live-table'),
+                        html.Div(id='positive-live-table'),
                         width=5
                     )
                 ]
@@ -768,12 +768,12 @@ def update_negative_tweets(click, n, keyword):
 #%%
 #most postive tweets-------------------------------------------------------
 @app.callback(
-    Output('postive-live-table', 'children'),
+    Output('positive-live-table', 'children'),
     [Input('term-search', 'n_clicks'),
-    Input('postive-table-update', 'n_intervals'),
+    Input('positive-table-update', 'n_intervals'),
     Input('input-temp', 'children')]
 )
-def update_postive_tweets(click, n, keyword):
+def update_positive_tweets(click, n, keyword):
     conn = sqlite3.connect('twitter.db')
     df = pd.read_sql(
         'SELECT tweet, sentiment FROM tweets WHERE tweet LIKE ? ORDER BY sentiment DESC LIMIT 30',
