@@ -2,4 +2,4 @@
 *.docx
 __pycache__/
 *.h5
-*.pickle
+*.DS_Store

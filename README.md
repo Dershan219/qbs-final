@@ -3,6 +3,7 @@ This tool is for collecting and analysing tweet, by LSTM model, which can let yo
 
 ## Requirements
 - Keras 2.3.1
+- tensorflow 2.2.0
 - dash_core_components 1.10.0
 - nltk 3.4.5
 - wordcloud 1.7.0
