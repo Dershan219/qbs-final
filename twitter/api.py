@@ -58,14 +58,16 @@ def preprocess(text):
 # Creating Tweets Database-------------------------------------------------
 # update tweets with stream listener
 class Listener(StreamListener):
-    def __init__(self):
+    def __init__(self, api=None):
         self.cnt = 0
+        self.api = api or API()
         self.engine = create_engine('sqlite:///twitter.sqlite')
 
-    def on_data(self, data):
+    def on_status(self, status):
         try:
             self.cnt += 1
-            tweet_data = json.loads(data)
+            tweet_json = json.dumps(status._json)
+            tweet_data = json.loads(tweet_json)
             tweet_id = str(tweet_data['id_str'])
 
             # collecting full tweets
@@ -131,7 +133,8 @@ while True:
     try:
         auth = OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_secret)
-        twitter_stream = Stream(auth, Listener(), tweet_mode='extended')
+        api = API(auth)
+        twitter_stream = Stream(auth, Listener(api), tweet_mode='extended')
         twitter_stream.filter(languages=["en"], track=["a","e","i","o","u"])
     except Exception as e:
         print(str(e))

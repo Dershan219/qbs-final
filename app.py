@@ -14,7 +14,7 @@ import os
 import re
 import pickle
 from io import BytesIO
-from wordcloud import WordCloud, STOPWORDS
+from wordcloud import WordCloud
 import base64
 from sklearn.feature_extraction.text import TfidfVectorizer
 from tensorflow.keras.models import load_model
@@ -654,7 +654,6 @@ image = Image.open(app.get_asset_url("logo.png"))
 processed_image = image.crop((70,70,330,330)).convert('L').resize((520, 360))
 mask = np.array(ImageOps.invert(processed_image))
 
-# stopwords.update()
 def plot_wordcloud(data):
     d = {a: x for a, x in data.values}
     wc = WordCloud(
