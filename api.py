@@ -108,7 +108,7 @@ class Listener(StreamListener):
                 SELECT time,
                 strftime('%M','now') - strftime('%M', datetime(time/1000, 'unixepoch')) as time_passed
                 FROM tweets
-                WHERE time_passed >= 2))
+                WHERE time_passed >= 10))
                 """
             )
             conn.commit()
