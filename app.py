@@ -24,7 +24,6 @@ from nltk.corpus import stopwords
 from nltk import word_tokenize
 from nltk.stem.porter import PorterStemmer
 from PIL import Image, ImageOps
-import requests
 
 os.chdir('C://Users/Andy/Desktop/NTU Courses/Quantitative Business Science/Project/twitter-sentiment')
 
@@ -40,10 +39,8 @@ app_colors = {
     'plot5':'#00acee'
 }
 
-LOGO = "https://help.twitter.com/content/dam/help-twitter/brand/logo.png"
 THEME = dbc.themes.SLATE
 REFRESH = 1000 # ms
-DASH_CSS = "./dash_style.css"
 
 # preparing LSTM model------------------------------------------------------
 def jaccard_distance_loss(y_true, y_pred, smooth=100):
@@ -79,13 +76,13 @@ def preprocess(text):
     review_tokenized=pad_sequences(tokenizer.texts_to_sequences([review]), maxlen=300)
     return review, review_tokenized
 
-app = dash.Dash(__name__, external_stylesheets=[THEME, DASH_CSS])
+app = dash.Dash(__name__, external_stylesheets=[THEME])
 
 #%%
 # layout settings-----------------------------------------------------------
 header = dbc.Navbar(
     [
-        dbc.Col(html.Img(src=LOGO, height="36px"), md=0.5),
+        dbc.Col(html.Img(src=app.get_asset_url("logo.png"), height="36px"), md=0.5),
         dbc.Col(
             dbc.NavbarBrand(
                 "Twitter Sentiment",
@@ -454,7 +451,8 @@ def update_temp(click, keyword):
     Input('input-temp', 'children')]
 )
 def update_terms(click, n, keyword):
-    conn = sqlite3.connect('twitter.db')
+    # conn = sqlite3.connect('twitter.db')
+    conn = sqlite3.connect('twitter.sqlite')
     df = pd.read_sql(
     "SELECT tweet, keywords FROM tweets WHERE tweet LIKE ? ORDER BY time DESC LIMIT 2000",
     conn, params=('%' + keyword + '%', ))
@@ -534,7 +532,8 @@ def update_search(c1, c2, c3, c4, c5, kw1, kw2, kw3, kw4, kw5):
     Input('input-temp', 'children')]
 )
 def update_graph(click, n, keyword):
-    conn = sqlite3.connect('twitter.db')
+    # conn = sqlite3.connect('twitter.db')
+    conn = sqlite3.connect('twitter.sqlite')
     df = pd.read_sql(
         'SELECT * FROM tweets WHERE tweet LIKE ? ORDER BY time DESC LIMIT 2000',
         conn, params=('%' + keyword + '%', ))
@@ -615,7 +614,8 @@ def update_graph(click, n, keyword):
     Input('input-temp', 'children')]
 )
 def update_pie(click, n, keyword):
-    conn = sqlite3.connect('twitter.db')
+    # conn = sqlite3.connect('twitter.db')
+    conn = sqlite3.connect('twitter.sqlite')
     df = pd.read_sql(
         'SELECT * FROM tweets WHERE tweet LIKE ? ORDER BY time DESC LIMIT 2000',
         conn, params=('%' + keyword + '%', ))
@@ -650,7 +650,7 @@ def update_pie(click, n, keyword):
 
 #%%
 # wordcloud-----------------------------------------------------------------
-image = Image.open(BytesIO(requests.get(LOGO).content))
+image = Image.open(app.get_asset_url("logo.png"))
 processed_image = image.crop((70,70,330,330)).convert('L').resize((520, 360))
 mask = np.array(ImageOps.invert(processed_image))
 
@@ -672,7 +672,8 @@ def plot_wordcloud(data):
     Input('input-temp', 'children')]
 )
 def make_image(click, n, keyword):
-    conn = sqlite3.connect('twitter.db')
+    # conn = sqlite3.connect('twitter.db')
+    conn = sqlite3.connect('twitter.sqlite')
     df = pd.read_sql(
         "SELECT tweet, keywords FROM tweets WHERE tweet LIKE ? ORDER BY time DESC LIMIT 2000",
         conn, params=('%' + keyword + '%', ))
@@ -757,7 +758,8 @@ def generate_table(df):
     Input('input-temp', 'children')]
 )
 def update_negative_tweets(click, n, keyword):
-    conn = sqlite3.connect('twitter.db')
+    # conn = sqlite3.connect('twitter.db')
+    conn = sqlite3.connect('twitter.sqlite')
     df = pd.read_sql(
         'SELECT tweet, sentiment FROM tweets WHERE tweet LIKE ? ORDER BY sentiment LIMIT 30',
         conn, params=('%' + keyword + '%', )
@@ -775,7 +777,8 @@ def update_negative_tweets(click, n, keyword):
     Input('input-temp', 'children')]
 )
 def update_positive_tweets(click, n, keyword):
-    conn = sqlite3.connect('twitter.db')
+    # conn = sqlite3.connect('twitter.db')
+    conn = sqlite3.connect('twitter.sqlite')
     df = pd.read_sql(
         'SELECT tweet, sentiment FROM tweets WHERE tweet LIKE ? ORDER BY sentiment DESC LIMIT 30',
         conn, params=('%' + keyword + '%', )
