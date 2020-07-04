@@ -22,7 +22,7 @@ This tool is for collecting and analyzing tweets using a self-trained LSTM model
 
 
 ## NLTK Package Requirement
-Once you download them in your python, you needn't do it again.
+Once you download the files to your computer, you needn't do it again.
  
  ```python
 import nltk
