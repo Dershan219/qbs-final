@@ -36,7 +36,7 @@ nltk.download('punkt')
 $ python3 api.py
 # Then, keep running api.py and open another Terminal/ Cmd
 $ python3 app.py
-# Finally, you can see the Dashboard on [http://127.0.0.1:8050/](http://127.0.0.1:8050/).
+# Finally, you can see the Dashboard on http://127.0.0.1:8050/
 ```
 
 ## Feaures
