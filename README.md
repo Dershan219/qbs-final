@@ -32,10 +32,12 @@ nltk.download('punkt')
 
 ## Usage
  ```python
-# First, run api.py
+# 1. Run api.py
 $ python3 api.py
-# Then, keep running api.py and open another Terminal/ Cmd
+
+# 2. Keep running api.py and open another Terminal/ Cmd
 $ python3 app.py
+
 # Finally, you can see the Dashboard on http://127.0.0.1:8050/
 ```
 
