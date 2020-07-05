@@ -11,8 +11,8 @@ By utilizing the [Tweepy Streaming API](http://docs.tweepy.org/en/latest/streami
 
 ### Test Out the Model
 <p align="center">
-  <img src="/images/model1.png" width="450" height="260" hspace="15"/>
-  <img src="/images/model2.png" width="450" height="260" hspace="15"/>
+  <img src="/images/model1.png" width="460" height="260" hspace="20"/>
+  <img src="/images/model2.png" width="460" height="260" hspace="20"/>
 </p>
  
 ## Requirements
