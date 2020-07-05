@@ -52,8 +52,9 @@ After entering your desired keyword into the search bar, check out the trend lin
 ### Test Out the Model
 Enter any paragraph into the text box to generate a sentiment score with our model!
 A sentiment score of 1 means the text is positive, while a score of 0 indicates that the text is probably pretty negative.
+The model building process is documented in [model.ipynb](model.ipynb).
 <p align="center">
-  <img src="/images/model1.png" width="450" height="270" hspace="25"/>
-  <img src="/images/model2.png" width="450" height="270" hspace="25"/>
+  <img src="/images/model1.png" width="450" height="270" hspace="20"/>
+  <img src="/images/model2.png" width="450" height="270" hspace="20"/>
 </p>
  
