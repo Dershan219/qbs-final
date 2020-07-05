@@ -4,12 +4,15 @@ We're still looking for a way to deploy the app on a server, before that's finis
 
 ## Feaures
 ### Live Sentiment on Twitter
-By utilizing the [Tweepy Streaming API](http://docs.tweepy.org/en/latest/streaming_how_to.html), the [api.py](api.py) file collects tweets real-time and store them in a sqlite database. After the database is constructed locally, the app will be accessible by running the [app.py](app.py) file and going to this link: [http://127.0.0.1:8050/](http://127.0.0.1:8050/).
+By utilizing the [Tweepy Streaming API](http://docs.tweepy.org/en/latest/streaming_how_to.html), the [api.py](api.py) file collects tweets real-time and stores them in a sqlite database. After the database is constructed locally, the app will be accessible by running the [app.py](app.py) file and going to this link: [http://127.0.0.1:8050/](http://127.0.0.1:8050/).
 
 ### Analyze the Tweets
 ![](./images/trend_line.png)
+After entering your desired keyword into the search bar, check out the trend line to get a rough picture of the keyword's current perception on Twitter. You can also dig into the most negative & positive tweets and the top occuring terms to obtain more insights regarding the topic.
 
 ### Test Out the Model
+Enter any paragraph into the text box to generate a sentiment score with our model!
+A sentiment score of 1 means the text is positive, while a score of 0 indicates that the text is probably pretty negative.
 <p align="center">
   <img src="/images/model1.png" width="450" height="270" hspace="25"/>
   <img src="/images/model2.png" width="450" height="270" hspace="25"/>
