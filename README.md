@@ -54,7 +54,7 @@ Enter any paragraph into the text box to generate a sentiment score with our mod
 A sentiment score of 1 means the text is positive, while a score of 0 indicates that the text is probably pretty negative.
 The model building process is documented in [model.ipynb](model.ipynb).
 <p align="center">
-  <img src="/images/model1.png" width="450" height="270" hspace="20"/>
-  <img src="/images/model2.png" width="450" height="270" hspace="20"/>
+  <img src="/images/model1.png" width="450" height="270" hspace="15"/>
+  <img src="/images/model2.png" width="450" height="270" hspace="15"/>
 </p>
  
