@@ -3,23 +3,23 @@ This tool is for collecting and analyzing tweets using a self-trained LSTM model
 We're still looking for a way to deploy the app on a server, before that's finished you'll have to clone the repo and run the code on your computer.
 
 ## Requirements
-- Keras 2.3.1
-- tensorflow 2.2.0
-- dash_core_components 1.10.0
 - nltk 3.4.5
-- wordcloud 1.7.0
-- dash_html_components 1.0.3
-- numpy 1.17.0
-- dash 1.12.0
-- requests 2.23.0
-- Unidecode 1.1.1
-- pandas 1.0.3
 - plotly 4.8.1
-- tweepy 3.8.0
-- dash_table 4.7.0
-- dash_bootstrap_components 0.10.2
+- Keras 2.3.1
 - Pillow 7.1.2
+- dash 1.12.0
+- tweepy 3.8.0
+- pandas 1.0.3
+- numpy 1.17.0
+- requests 2.23.0
+- tensorflow 2.2.0
+- wordcloud 1.7.0
+- dash_table 4.7.0
+- Unidecode 1.1.1
 - scikit_learn 0.23.1
+- dash_html_components 1.0.3
+- dash_core_components 1.10.0
+- dash_bootstrap_components 0.10.2
 
 ### NLTK Package Requirements
 You should do this before you run api.py and app,py
