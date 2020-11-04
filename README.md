@@ -12,7 +12,7 @@ Clone the repo and execute [api.py](api.py) and [app.py](app.py) on your compute
 - pandas 1.0.3
 - numpy 1.17.0
 - requests 2.23.0
-- tensorflow 2.2.0
+- tensorflow 2.2.1
 - wordcloud 1.7.0
 - dash_table 4.7.0
 - Unidecode 1.1.1
