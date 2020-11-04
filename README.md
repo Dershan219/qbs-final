@@ -1,6 +1,6 @@
 # Twitter Sentiment Dashboard
 This tool is for collecting and analyzing tweets using a self-trained LSTM model, giving you a quick view about how others react to the topic you are into.
-We're still looking for a way to deploy the app on a server, before that's finished you'll have to clone the repo and run the code on your computer.
+Clone the repo and execute [api.py](api.py) and [app.py](app.py) on your computer sequentially.
 
 ## Requirements
 - nltk 3.4.5
@@ -22,8 +22,7 @@ We're still looking for a way to deploy the app on a server, before that's finis
 - dash_bootstrap_components 0.10.2
 
 ### NLTK Package Requirements
-You should do this before you run api.py and app,py
-Once you download the files to your computer, you needn't do it again.
+Before executing [api.py](api.py) and [app.py](app.py), a couple of nltk corpora need to be downloaded first.
  ```python
 import nltk
 nltk.download('stopwords') 
