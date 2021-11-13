@@ -6,7 +6,7 @@ dash_html_components==1.0.3
 Keras==2.3.1
 tensorflow==2.5.2
 dash_core_components==1.10.0
-nltk==3.4.5
+nltk==3.6.5
 dash==1.12.0
 dash_table==4.7.0
 dash_core_components==1.10.0
